@@ -354,9 +354,11 @@ endif()
 set(
     qhull_TARGETS_INSTALL
         ${qhull_CPP} ${qhull_STATIC} ${qhull_STATICR} ${qhull_SHAREDR}
-        qhull rbox qconvex qdelaunay qvoronoi qhalf
         ${qhull_SHARED} ${qhull_SHAREDP}  # Deprecated, use qhull_r instead
 )
+IF(BUILD_PROGRAMS)
+    list(APPEND qhull_TARGETS_INSTALL qhull rbox qconvex qdelaunay qvoronoi qhalf)
+ENDIF()
 set(
     qhull_TARGETS_TEST   # Unused
         user_eg user_eg2 user_eg3 user_egp testqset testqset_r
@@ -475,31 +477,33 @@ set_target_properties(${qhull_CPP} PROPERTIES
 #
 # If you prefer dynamic linking, use qhull_SHAREDR or qhull_SHARED instead.
 # ---------------------------------------
+option(BUILD_PROGRAMS "Should we build the test programs ?" OFF)
+IF(BUILD_PROGRAMS)
+    set(qhull_SOURCES       src/qhull/unix_r.c)
+    set(rbox_SOURCES        src/rbox/rbox.c)
+    set(qconvex_SOURCES     src/qconvex/qconvex.c)
+    set(qdelaunay_SOURCES   src/qdelaunay/qdelaun.c)
+    set(qvoronoi_SOURCES    src/qvoronoi/qvoronoi.c)
+    set(qhalf_SOURCES       src/qhalf/qhalf.c)
 
-set(qhull_SOURCES       src/qhull/unix_r.c)
-set(rbox_SOURCES        src/rbox/rbox.c)
-set(qconvex_SOURCES     src/qconvex/qconvex.c)
-set(qdelaunay_SOURCES   src/qdelaunay/qdelaun.c)
-set(qvoronoi_SOURCES    src/qvoronoi/qvoronoi.c)
-set(qhalf_SOURCES       src/qhalf/qhalf.c)
+    add_executable(qhull ${qhull_SOURCES})
+    target_link_libraries(qhull ${qhull_STATICR})
 
-add_executable(qhull ${qhull_SOURCES})
-target_link_libraries(qhull ${qhull_STATICR})
+    add_executable(rbox ${rbox_SOURCES})
+    target_link_libraries(rbox ${qhull_STATIC})
 
-add_executable(rbox ${rbox_SOURCES})
-target_link_libraries(rbox ${qhull_STATIC})
+    add_executable(qconvex ${qconvex_SOURCES})
+    target_link_libraries(qconvex ${qhull_STATIC})
 
-add_executable(qconvex ${qconvex_SOURCES})
-target_link_libraries(qconvex ${qhull_STATIC})
+    add_executable(qdelaunay ${qdelaunay_SOURCES})
+    target_link_libraries(qdelaunay ${qhull_STATIC})
 
-add_executable(qdelaunay ${qdelaunay_SOURCES})
-target_link_libraries(qdelaunay ${qhull_STATIC})
+    add_executable(qvoronoi ${qvoronoi_SOURCES})
+    target_link_libraries(qvoronoi ${qhull_STATIC})
 
-add_executable(qvoronoi ${qvoronoi_SOURCES})
-target_link_libraries(qvoronoi ${qhull_STATIC})
-
-add_executable(qhalf ${qhalf_SOURCES})
-target_link_libraries(qhalf ${qhull_STATIC})
+    add_executable(qhalf ${qhalf_SOURCES})
+    target_link_libraries(qhalf ${qhull_STATIC})
+endif()
 
 # ---------------------------------------
 # Define options for linking to qhull_SHAREDR or qhull_SHARED
